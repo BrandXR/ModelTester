@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Awesomesauce Labs" />
+  <title>Manual: Piglet glTF Importer 1.2.1</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; } /* Alert */
+    code span.an { color: #008000; } /* Annotation */
+    code span.at { } /* Attribute */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #0000ff; } /* ControlFlow */
+    code span.ch { color: #008080; } /* Char */
+    code span.cn { } /* Constant */
+    code span.co { color: #008000; } /* Comment */
+    code span.cv { color: #008000; } /* CommentVar */
+    code span.do { color: #008000; } /* Documentation */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.im { } /* Import */
+    code span.in { color: #008000; } /* Information */
+    code span.kw { color: #0000ff; } /* Keyword */
+    code span.op { } /* Operator */
+    code span.ot { color: #ff4000; } /* Other */
+    code span.pp { color: #ff4000; } /* Preprocessor */
+    code span.sc { color: #008080; } /* SpecialChar */
+    code span.ss { color: #008080; } /* SpecialString */
+    code span.st { color: #008080; } /* String */
+    code span.va { } /* Variable */
+    code span.vs { color: #008080; } /* VerbatimString */
+    code span.wa { color: #008000; font-weight: bold; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="css/classless.css" />
+  <link rel="stylesheet" href="css/piglet.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Manual: Piglet glTF Importer 1.2.1</h1>
+</header>
+<ul>
+<li>Online documentation: <a href="https://awesomesaucelabs.github.io/piglet-manual/" class="uri">https://awesomesaucelabs.github.io/piglet-manual/</a></li>
+<li>Support e-mail: “awesomesaucelabs” (at gmail)</li>
+</ul>
+<p><img src="images/piglet-logo.png" style="width:40.0%" /></p>
+<h1 id="table-of-contents">Table of Contents</h1>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#caveats">Caveats</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#editor-imports">Editor Imports</a>
+<ul>
+<li><a href="#editor-imports-by-drag-and-drop">Editor Imports by Drag-and-Drop</a></li>
+<li><a href="#editor-animation-tutorial">Editor Animation Tutorial</a>
+<ul>
+<li><a href="#previewing-animations-in-the-editor">Previewing Animations in the Editor</a></li>
+<li><a href="#playing-mecanim-animations-at-runtime">Playing (Mecanim) Animations at Runtime</a></li>
+</ul></li>
+<li><a href="#editor-import-options-piglet-options-window">Editor Import Options (Piglet Options Window)</a></li>
+</ul></li>
+<li><a href="#runtime-imports">Runtime Imports</a>
+<ul>
+<li><a href="#runtime-import-tutorial">Runtime Import Tutorial</a></li>
+<li><a href="#runtime-animation-tutorial">Runtime Animation Tutorial</a></li>
+<li><a href="#runtime-import-api">Runtime Import API</a>
+<ul>
+<li><a href="#runtime-import-api-overview">Overview</a></li>
+<li><a href="#creating-a-gltfimporttask">Creating a GltfImportTask</a></li>
+<li><a href="#configuring-callbacks-on-a-gltfimporttask">Configuring Callbacks on a GltfImportTask</a></li>
+<li><a href="#executing-a-gltfimporttask">Executing a GltfImportTask</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#optimizing-gltf-files">Optimizing glTF Files</a>
+<ul>
+<li><a href="#using-supercompressed-textures">Using Supercompressed Textures (Unity 2019.3+)</a>
+<ul>
+<li><a href="#supercompressed-textures-overview">Overview</a></li>
+<li><a href="#installing-ktxunity">Installing KtxUnity</a></li>
+<li><a href="#preprocessing-gltf-files">Preprocessing glTF Files</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#urp-support">URP Support (Unity 2019.3+)</a></li>
+<li><a href="#piglet-viewer">Sample Application: PigletViewer</a></li>
+<li><a href="#changelog">Changelog</a></li>
+<li><a href="#footnotes">Footnotes</a></li>
+</ul>
+<h1 id="introduction">Introduction</h1>
+<p>Piglet is a Unity asset that allows you to import 3D models from glTF files, both in the Editor and at runtime. This provides Unity developers with access to a large collection of free textures, materials, and models from sites like <a href="https://sketchfab.com/">Sketchfab</a> and <a href="https://poly.google.com">Google Poly</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Visit the <a href="https://awesomesaucelabs.github.io/piglet-webgl-demo/">Web Demo</a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to try Piglet before you buy it.</p>
+<h1 id="features">Features</h1>
+<ul>
+<li>import glTF models in the Editor or at runtime</li>
+<li>import glTF models from <code>.gltf</code>, <code>.glb</code>, or <code>.zip</code> files, using file paths or HTTP URLs</li>
+<li>import and play glTF animations (including skins and blendshapes)</li>
+<li>import glTF textures and materials, for use with your own models</li>
+<li>supports supercompressed textures via <a href="https://github.com/atteneder/KtxUnity">KtxUnity</a> (Unity 2019.3+)</li>
+<li>tested with glTF models from <a href="https://sketchfab.com/">Sketchfab</a>, <a href="https://poly.google.com">Google Poly</a>, and <a href="https://www.blender.org/">Blender</a></li>
+<li>supported render pipelines: built-in (Unity 2018.4+), URP (Unity 2019.3+)</li>
+<li>supported platforms: Windows, Android, WebGL</li>
+<li>full source code provided</li>
+</ul>
+<h1 id="caveats">Caveats</h1>
+<ul>
+<li><strong>Runtime imports may stall the main Unity thread</strong>. I have done my best to minimize interruptions to the main Unity thread during runtime imports, but I cannot provide any hard guarantees about this yet. Unity requires certain operations (e.g. texture uploads to the GPU, mesh creation) to be performed on the main Unity thread, so it is possible for runtime imports to cause “hiccups” during game execution.</li>
+</ul>
+<h1 id="installation">Installation</h1>
+<p>To set up Piglet in your project, purchase and install Piglet from the <a href="https://assetstore.unity.com/packages/slug/173425">Asset Store page</a>. Piglet works with Unity 2018.4 or later, and does not require installation of any third-party dependencies. If you wish to try your own glTF models with Piglet prior to purchasing the asset, please see the <a href="https://awesomesaucelabs.github.io/piglet-webgl-demo/">Piglet WebGL Demo</a>.</p>
+<p>Piglet bundles the following libraries:</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Library</th>
+<th style="text-align: left;">Author</th>
+<th style="text-align: left;">License</th>
+<th style="text-align: left;">Path</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="https://www.newtonsoft.com/json">Json.NET</a></td>
+<td style="text-align: left;"><a href="https://www.newtonsoft.com">Newtonsoft</a></td>
+<td style="text-align: left;">MIT License</td>
+<td style="text-align: left;"><code>Assets/Piglet/Dependencies/Json.NET</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="https://github.com/icsharpcode/SharpZipLib">SharpZipLib</a></td>
+<td style="text-align: left;"><a href="https://github.com/icsharpcode">icsharpcode@github</a></td>
+<td style="text-align: left;">MIT License</td>
+<td style="text-align: left;"><code>Assets/Piglet/Dependencies/SharpZipLib</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="https://github.com/sketchfab/UnityGLTF">UnityGLTF</a></td>
+<td style="text-align: left;"><a href="https://www.khronos.org/">Khronos</a>/<a href="https://sketchfab.com">Sketchfab</a></td>
+<td style="text-align: left;">MIT License</td>
+<td style="text-align: left;"><code>Assets/Piglet/Dependencies/UnityGLTF</code></td>
+</tr>
+</tbody>
+</table>
+<p><em>Note</em>: If your Unity project already includes one of these libraries (e.g. Json.NET), you may get errors in the Unity Console due to duplicate function/class definitions. In most cases, removing Piglet’s copy of the library under <code>Assets/Piglet/Dependencies</code> should solve the issue.</p>
+<h1 id="editor-imports">Editor Imports</h1>
+<h2 id="editor-imports-by-drag-and-drop">Editor Imports by Drag-and-Drop</h2>
+<p>This section demonstrates how to import glTF models in the Editor. For a video version of this section, see the <a href="https://youtu.be/wf26w0gcVcA">Editor Import Demo video</a>.</p>
+<p>Once you have installed Piglet from the Unity Asset Store, you can import glTF models into your Unity project by dragging-and-dropping <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> files from a file browser window (e.g. Windows File Explorer) to a folder inside the Unity Project Browser (Figure 1). Any folder under <code>Assets</code> can be used as the drop target, including the <code>Assets</code> directory itself.</p>
+<p>Importing a glTF file in the Editor produces a Unity prefab for the model, which can then be dragged into your Unity scenes as desired. Piglet places the generated prefab and any dependent asset files (e.g. textures, materials, meshes) under a newly-created subfolder named after the input <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file.</p>
+<figure>
+<img src="images/editor-import-figure.png" id="fig:editor-import" style="width:100.0%" alt="Figure 1: Importing a glTF model in the Editor. (A) The user drags-and-drops a .gltf/.glb/.zip file from Windows File Explorer to the Unity Project Browser window. (B) Piglet creates a Unity prefab for the model and opens it in the Prefab View." /><figcaption aria-hidden="true">Figure 1: Importing a glTF model in the Editor. (A) The user drags-and-drops a .gltf/.glb/.zip file from Windows File Explorer to the Unity Project Browser window. (B) Piglet creates a Unity prefab for the model and opens it in the Prefab View.</figcaption>
+</figure>
+<p>There may be circumstances where you want copy a <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file into your project without automatically converting it to a Unity prefab. You can bypass/disable Piglet’s default drag-and-drop behaviour by any of the following methods:</p>
+<ul>
+<li>Hold down the <code>Control</code> or <code>Command</code> key while dragging-and-dropping the <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> into the Unity Project Browser.</li>
+<li>Uncheck <code>Enable drag-and-drop glTF import</code> in the Piglet Options window, located under <code>Window =&gt; Piglet Options</code> in the Unity menu.</li>
+<li>Copy the <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file into the Unity project directory from a file browser window or on the command line. (In other words, copy the file “behind Unity’s back”.)</li>
+</ul>
+<h2 id="editor-animation-tutorial">Editor Animation Tutorial</h2>
+<p>Piglet can import and play animations from glTF files, both in the Editor and at runtime. This section demonstrates how to preview animation clips created during Editor imports, and how to play them back from runtime scripts. For a video version of this section, see the <a href="https://youtu.be/MX2cIKCxm90">Editor Animation Tutorial video</a>.</p>
+<h3 id="previewing-animations-in-the-editor">Previewing Animations in the Editor</h3>
+<p>If a glTF file contains animations, Piglet will create an <code>Animations</code> subdirectory under the main import directory containing: (1) an <code>AnimatorController</code> asset (“controller”) for playing the animations at runtime, (2) a “Static Pose” <code>AnimationClip</code> for resetting the model to its default pose, and (3) an <code>AnimationClip</code> asset for each animation from the glTF file (Figure 2). The “controller” asset is not needed for previewing animations but is further explained in <a href="#playing-mecanim-animations-at-runtime">Playing (Mecanim) Animations at Runtime</a>.</p>
+<p>To preview an glTF animation in the Editor, first select the AnimationClip asset in the Project Browser window (Figure 2). This will cause a blank Animation Preview Area to appear in the Inspector window with the message <code>No model is available for preview. Please drag a model into this Preview Area</code>. Next, drag the prefab for the imported glTF model (located one level up from the <code>Animations</code> folder) onto the Animation Preview Area. You should then be able to click the Play button to view the animation in the Editor.</p>
+<figure>
+<img src="images/animation-preview-figure.png" id="fig:animation-preview" style="width:100.0%" alt="Figure 2: Previewing an animation clip in the Editor. (A) The user selects an animation clip in the “Animations” subdirectory, causing the Animation Preview Area to appear in the Inspector (bottom right). (B) The user drags the prefab for the model from the main import directory onto the Animation Preview Area, in order to associate the model with the animation clip. Having established this link, the user is able to preview the animation by clicking the Play button in the Animation Preview Area. Attribution: These screenshots depict the “Cartoon Hartman” model by Willy Decarpentrie, skudgee@sketchfab, CC Attribution License." /><figcaption aria-hidden="true">Figure 2: Previewing an animation clip in the Editor. (A) The user selects an animation clip in the “Animations” subdirectory, causing the Animation Preview Area to appear in the Inspector (bottom right). (B) The user drags the prefab for the model from the main import directory onto the Animation Preview Area, in order to associate the model with the animation clip. Having established this link, the user is able to preview the animation by clicking the Play button in the Animation Preview Area. <strong>Attribution</strong>: These screenshots depict the <a href="https://sketchfab.com/3d-models/morpher-animated-face-military-cartoon-hartman-538a674c39e24c15965231ab2bdb656a">“Cartoon Hartman”</a> model by Willy Decarpentrie, <a href="https://sketchfab.com/skudgee">skudgee@sketchfab</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC Attribution License</a>.</figcaption>
+</figure>
+<h3 id="playing-mecanim-animations-at-runtime">Playing (Mecanim) Animations at Runtime</h3>
+<p>This section demonstrates how play animation clip assets from runtime scripts. By default, Editor glTF imports create Mecanim animation clips, and the instructions in this section are specific to Mecanim<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. For details about playing Legacy animation clips at runtime, see the <a href="#runtime-animation-tutorial">Runtime Animation Tutorial</a> section of this manual<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.</p>
+<p>When a glTF file contains one or more animations, Piglet will attach two additional components to the root <code>GameObject</code> of the model: (1) an <code>Animator</code> component for controlling playback of the animation clips, and (2) an <code>AnimationList</code> component with an ordered list of the animation clips (Figure 3). The <code>AnimationList</code> component allows users to access the animation clips by their original index in the glTF file. More importantly, it provides access to the <code>.name</code> field of each animation clip, which is needed for play that clip with the <code>Animator</code> component.</p>
+<figure>
+<img src="images/mecanim-animation-components-figure.png" id="fig:mecanim-animation-components" style="width:100.0%" alt="Figure 3: Animation-related components on the root GameObject (A) of an Editor-imported model. When a glTF model has one or more animations, Piglet will attach: an Animator component for playing the animation clips at runtime (B), and an AnimationList component for accessing the animation clips by their original index in the glTF file (C). Attribution: These screenshots depict the “Cartoon Hartman” model by Willy Decarpentrie, skudgee@sketchfab, CC Attribution License." /><figcaption aria-hidden="true">Figure 3: Animation-related components on the root <code>GameObject</code> (A) of an Editor-imported model. When a glTF model has one or more animations, Piglet will attach: an <code>Animator</code> component for playing the animation clips at runtime (B), and an <code>AnimationList</code> component for accessing the animation clips by their original index in the glTF file (C). <strong>Attribution</strong>: These screenshots depict the <a href="https://sketchfab.com/3d-models/morpher-animated-face-military-cartoon-hartman-538a674c39e24c15965231ab2bdb656a">“Cartoon Hartman”</a> model by Willy Decarpentrie, <a href="https://sketchfab.com/skudgee">skudgee@sketchfab</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC Attribution License</a>.</figcaption>
+</figure>
+<p>Every <code>Animator</code> component depends on a state machine called an <code>AnimatorController</code>, that determines which animation clip to play at any given time (Figure 4). In most cases, there is a one-to-one correspondence between <code>AnimatorController</code> states and animation clips. In order to start playing a particular clip at runtime, we just need to activate the correct state in the <code>AnimatorController</code> and start the <code>Animator</code> playing. Both of these tasks are accomplished by calling the <code>Animator.Play</code> method.</p>
+<figure>
+<img src="images/animator-controller-figure.png" id="fig:animator-controller" style="width:100.0%" alt="Figure 4: An example AnimatorController used for playing Editor-imported animation clips at runtime. An AnimatorController is a state machine used by the Animator component to determine which animation clip to play at any given time. Piglet creates a default AnimatorController asset called “controller” in the Animations subdirectory (C). This controller contains one state per animation clip (D) and two special states that are present in every AnimatorController: “Any State” (A) and “Entry” (B). For regular controller states, the link between the state and its corresponding animation clip is set by the Motion field (E)." /><figcaption aria-hidden="true">Figure 4: An example <code>AnimatorController</code> used for playing Editor-imported animation clips at runtime. An <code>AnimatorController</code> is a state machine used by the <code>Animator</code> component to determine which animation clip to play at any given time. Piglet creates a default <code>AnimatorController</code> asset called “controller” in the <code>Animations</code> subdirectory (C). This controller contains one state per animation clip (D) and two special states that are present in every <code>AnimatorController</code>: “Any State” (A) and “Entry” (B). For regular controller states, the link between the state and its corresponding animation clip is set by the <code>Motion</code> field (E).</figcaption>
+</figure>
+<p>Listing 1 shows an example script that plays a Mecanim animation clip as soon as Unity enters Play Mode. We start the animation by calling the <code>Animator.Play</code> method, passing in the initial <code>AnimatorController</code> state and layer<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> as arguments. By convention, Piglet uses the <code>.name</code> field of an <code>AnimationClip</code> for the corresponding state name in the <code>AnimatorController</code>, and thus we can get the state name by accessing the target clip by index in the <code>AnimationList</code> component. Note that Listing 1 accesses the clip at index 1 in the <code>AnimationList</code>, rather than index 0, because index 0 is reserved for the special “Static Pose” clip that resets the model to its default pose<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. As such, the animations imported from the glTF file always start at index 1. For the layer argument to <code>Animator.Play</code>, we simply pass in 0, because the controller generated by Piglet only uses the default layer.</p>
+<div id="lst:play-mecanim-clip" class="listing cs">
+<div class="sourceCode" id="cb1"><pre class="sourceCode cs"><code class="sourceCode cs"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> UnityEngine;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Piglet;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> AnimationBehaviour : MonoBehaviour</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Start</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> anim = GetComponent&lt;Animator&gt;();</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> animList = GetComponent&lt;AnimationList&gt;();</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: Imported animation clips always start</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// at index 1, because index &quot;0&quot; is reserved for</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the &quot;Static Pose&quot; clip.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> stateName = animList.<span class="fu">Clips</span>[<span class="dv">1</span>].<span class="fu">name</span>;</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: We use 0 for the layer index argument</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// because the AnimatorController generated by</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Piglet only uses the default layer.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        anim.<span class="fu">Play</span>(stateName, <span class="dv">0</span>);</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Listing 1: A minimal script for playing an Editor-imported (Mecanim) animation clip at runtime. When this script is attached to the root <code>GameObject</code> of the model, it plays the first animation from the glTF file, immediately after Unity enters Play Mode. Note that the imported animations always begin at index 1 in the <code>AnimationList</code>, because index 0 is reserved for the “Static Pose” clip.</p>
+</div>
+<h2 id="editor-import-options-piglet-options-window">Editor Import Options (Piglet Options Window)</h2>
+<p>A number of options controlling Editor glTF imports can be set in the Piglet Options window, located under <code>Window =&gt; Piglet Options</code> in the Unity menu.</p>
+<p><img src="images/piglet-options-window.png" /></p>
+<table>
+<caption>Global Options</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Option</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Enable drag-and-drop glTF import</code></td>
+<td style="text-align: left;">Enable/disable automatic glTF imports when dragging .gltf/.glb/.zip files onto the Project Browser window</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Import Options</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Option</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Scale model to standard size</code></td>
+<td style="text-align: left;">Enable/disable automatic resizing of imported model</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Size</code></td>
+<td style="text-align: left;">Target size of model, along its longest dimension</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Import animations</code></td>
+<td style="text-align: left;">Enable/disable import of glTF animations as Unity <code>AnimationClip</code> assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Animation clip type</code></td>
+<td style="text-align: left;">“Mecanim” or “Legacy”</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Editor Options</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Option</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Prompt before overwriting files</code></td>
+<td style="text-align: left;">Show confirmation prompt if glTF import directory already exists</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Print progress messages in Console</code></td>
+<td style="text-align: left;">Log progress messages to Unity Console window during glTF imports (useful for debugging)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Select prefab in Project Browser</code></td>
+<td style="text-align: left;">After a glTF import has completed, select/highlight the generated prefab in the Project Browser window</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Add prefab instance to scene</code></td>
+<td style="text-align: left;">After a glTF import has completed, add the generated prefab to the current Unity scene, as a child of the currently selected game object. If no game object is selected in the scene, add the prefab at the root of the scene instead.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Select prefab instance in scene</code></td>
+<td style="text-align: left;">Select/highlight the prefab in the scene hierarchy after adding it to the scene</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Open prefab in Prefab View</code></td>
+<td style="text-align: left;">After a glTF import has completed, open the generated prefab in the Prefab View. (This is equivalent to double-clicking the prefab in the Project Browser.)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="runtime-imports">Runtime Imports</h1>
+<p>Piglet can import a glTF model at runtime from a file path, an HTTP URL, or a <code>byte[]</code> array containing the raw byte content of a .gltf/.glb/.zip file. Runtime imports are performed incrementally, with minimum possible interruption to the main Unity thread.</p>
+<h2 id="runtime-import-tutorial">Runtime Import Tutorial</h2>
+<p>This section walks through example code for importing a glTF model at runtime. For a video version of this section, see the <a href="https://youtu.be/f66wmgSTPI0">Runtime Import Tutorial video</a>. In addition, the example code in this section is included with Piglet under <code>Assets/Piglet/Examples/RuntimeImport</code>.</p>
+<p>As our example glTF model, we will use the <code>.glb</code> file for Sir Piggleston (the Piglet mascot), which may be downloaded from <a href="https://awesomesaucelabs.github.io/piglet-webgl-demo/StreamingAssets/piggleston.glb" class="uri">https://awesomesaucelabs.github.io/piglet-webgl-demo/StreamingAssets/piggleston.glb</a>. The minimal code to import the model at runtime is as follows:</p>
+<div id="lst:runtime-import" class="listing cs">
+<div class="sourceCode" id="cb2"><pre class="sourceCode cs"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Piglet;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> UnityEngine;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">/// This MonoBehaviour provides a minimal example for using</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">/// Piglet to import glTF models at runtime.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> RuntimeImportBehaviour : MonoBehaviour</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The currently running glTF import task.</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> GltfImportTask _task;</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked before the first frame.</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Create the glTF import task.</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Start</span>()</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: To import a local .gltf/.glb/.zip file, you may</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// instead pass an absolute file path to GetImportTask</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (e.g. &quot;C:/Users/Joe/Desktop/piggleston.glb&quot;), or a byte[]</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// array containing the raw byte content of the file.</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        _task = RuntimeGltfImporter.<span class="fu">GetImportTask</span>(</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;https://awesomesaucelabs.github.io/piglet-webgl-demo/StreamingAssets/piggleston.glb&quot;</span>);</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked after every frame.</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Here we call MoveNext() to advance execution</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// of the glTF import task.</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Update</span>()</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">// advance execution of glTF import task</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">MoveNext</span>();</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Listing 2: Minimal code to import a glTF file at runtime.</p>
+</div>
+<p>As shown in Listing 2, a runtime glTF import happens in two parts. First, we create an import task by calling <code>RuntimeGltfImporter.GetImportTask</code>, passing in the URL of the glTF model as a parameter. To load a local .gltf/.glb/.zip file, we may instead pass <code>GetImportTask</code> an absolute file path (e.g. “C:/Users/Joe/Desktop/piggleston.glb”) or a <code>byte[]</code> array containing the raw byte content of the file. Second, we advance the execution of the import task by repeatedly calling <code>MoveNext()</code> on the task. A convenient place to call <code>MoveNext()</code> is in the <code>Update()</code> method, which is called by Unity once per frame. Continuing to call <code>MoveNext()</code> after the import has completed does no harm.</p>
+<p>Attaching the script from Listing 2 to any game object in your Unity scene is sufficient to import a glTF model at runtime. However, in a real game/application, you will probably want tighter integration between your own code and the importer. For example, you may want to show progress messages while the model is loading, or to attach custom MonoBehaviours to the model once it has loaded. To achieve these types of behaviours, <code>GltfImportTask</code> provides callback hooks for: progress messages (<code>OnProgress</code>), user cancelation (<code>OnAborted</code>), import errors (<code>OnException</code>), and successful completion (<code>OnCompleted</code>).</p>
+<p>As a first example of callback usage, we’ll extend the example script from Listing 2 to print progress messages during the glTF import. We can achieve this by assigning a custom method to the <code>OnProgress</code> callback for the import task, as shown in Listing 3.</p>
+<div id="lst:runtime-import-with-progress" class="listing cs">
+<div class="sourceCode" id="cb3"><pre class="sourceCode cs"><code class="sourceCode cs"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Piglet;</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> UnityEngine;</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">/// This MonoBehaviour provides a minimal example for using</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">/// Piglet to import glTF models at runtime.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> RuntimeImportBehaviour : MonoBehaviour</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The currently running glTF import task.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> GltfImportTask _task;</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked before the first frame.</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Create the glTF import task.</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Start</span>()</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: To import a local .gltf/.glb/.zip file, you may</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// instead pass an absolute file path to GetImportTask</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (e.g. &quot;C:/Users/Joe/Desktop/piggleston.glb&quot;), or a byte[]</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// array containing the raw byte content of the file.</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        _task = RuntimeGltfImporter.<span class="fu">GetImportTask</span>(</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;https://awesomesaucelabs.github.io/piglet-webgl-demo/StreamingAssets/piggleston.glb&quot;</span>);</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">OnProgress</span> = OnProgress;</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Callback that is invoked by the glTF import task</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// to report intermediate progress.</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;param</span><span class="ot"> name=</span><span class="dt">&quot;step&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The current step of the glTF import process.  Each step imports</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// a different type of glTF entity (e.g. textures, materials).</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/param&gt;</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;param</span><span class="ot"> name=</span><span class="dt">&quot;completed&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The number of glTF entities (e.g. textures, materials) that have been</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// successfully imported for the current import step.</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/param&gt;</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;param</span><span class="ot"> name=</span><span class="dt">&quot;total&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The total number of glTF entities (e.g. textures, materials) that will</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// be imported for the current import step.</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/param&gt;</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">void</span> <span class="fu">OnProgress</span>(ImportStep step, <span class="dt">int</span> completed, <span class="dt">int</span> total)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        Debug.<span class="fu">LogFormat</span>(<span class="st">&quot;{0}: {1}/{2}&quot;</span>, step, completed, total);</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked after every frame.</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Here we call MoveNext() to advance execution</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// of the glTF import task.</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Update</span>()</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>        <span class="co">// advance execution of glTF import task</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">MoveNext</span>();</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Listing 3: An extension of the runtime import script from Listing 2 that prints progress messages to the Unity console. In comparison to Listing 2, the new parts of the code are the <code>OnProgress</code> method and the assignment of <code>OnProgress</code> to <code>_task.OnProgress</code> in <code>Start</code>.</p>
+</div>
+<p>Another important use of callbacks is to run custom code after a glTF import has successfully completed. For example, you might want to automatically resize the model, parent the model to another game object, or attach a custom <code>MonoBehaviour</code> to the model. These types of tasks can be accomplished using the <code>OnCompleted</code> callback. To demonstrate, the example script in Listing 4 uses the <code>OnCompleted</code> callback to obtain a reference to the imported model, then uses that reference to continually spin the model about the y-axis as if it were on a record turntable.</p>
+<p>The example in Listing 4 marks the end of this tutorial. Good luck and happy coding!</p>
+<div id="lst:runtime-import-spin" class="listing cs">
+<div class="sourceCode" id="cb4"><pre class="sourceCode cs"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Piglet;</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> UnityEngine;</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">/// This MonoBehaviour provides a minimal example for using</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">/// Piglet to import glTF models at runtime.</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> RuntimeImportBehaviour : MonoBehaviour</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The currently running glTF import task.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> GltfImportTask _task;</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Root GameObject of the imported glTF model.</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> GameObject _model;</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked before the first frame.</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Create the glTF import task.</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Start</span>()</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: To import a local .gltf/.glb/.zip file, you may</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// instead pass an absolute file path to GetImportTask</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (e.g. &quot;C:/Users/Joe/Desktop/piggleston.glb&quot;), or a byte[]</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// array containing the raw byte content of the file.</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        _task = RuntimeGltfImporter.<span class="fu">GetImportTask</span>(</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;https://awesomesaucelabs.github.io/piglet-webgl-demo/StreamingAssets/piggleston.glb&quot;</span>);</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">OnCompleted</span> = OnComplete;</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Callback that is invoked by the glTF import task</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// after it has successfully completed.</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;param</span><span class="ot"> name=</span><span class="dt">&quot;importedModel&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// the root GameObject of the imported glTF model</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/param&gt;</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">void</span> <span class="fu">OnComplete</span>(GameObject importedModel)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        _model = importedModel;</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        Debug.<span class="fu">Log</span>(<span class="st">&quot;Success!&quot;</span>);</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked after every frame.</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Here we call MoveNext() to advance execution</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// of the glTF import task.</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Update</span>()</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        <span class="co">// advance execution of glTF import task</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">MoveNext</span>();</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="co">// spin model about y-axis</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> (_model != <span class="kw">null</span>)</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>            _model.<span class="fu">transform</span>.<span class="fu">Rotate</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>);</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Listing 4: An extension of the runtime import script from Listing 2 that spins the imported model about the y-axis. In comparison to Listing 2, the new parts of the code are the <code>OnComplete</code> method, the assignment of <code>OnComplete</code> to <code>_task.OnCompleted</code> in <code>Start</code>, and the call to <code>_model.transform.Rotate</code> in <code>Update</code>.</p>
+</div>
+<h3 id="runtime-animation-tutorial">Runtime Animation Tutorial</h3>
+<p>This section demonstrates how to import and play animations from a glTF file at runtime. For a video version of this section, see the <a href="https://youtu.be/FBLCKLZljRE">Runtime Animation Tutorial video</a>.</p>
+<p>Runtime glTF imports always use the Legacy animation system, because Mecanim cannot create animation clips at runtime<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> (as of December 2020). In practice, I have not found this to be an issue – for simple playback of glTF animations, the Legacy system works very well.</p>
+<p>When Piglet imports a glTF model with one or more animations at runtime, it attaches two additional components to the root <code>GameObject</code> of the model: (1) an <code>Animation</code> component for controlling playback of the animation clips, and (2) an <code>AnimationList</code> component containing an ordered list of the animation clips (Figure 5). The <code>AnimationList</code> component allows users to access the imported animation clips by their original index in the glTF file. More importantly, it provides access to the <code>.name</code> field of each animation clip, which is needed for playing the clip with the <code>Animation</code> component.</p>
+<figure>
+<img src="images/legacy-animation-components-figure.png" id="fig:legacy-animation-components" style="width:100.0%" alt="Figure 5: Animation-related components on the root GameObject (A) of a runtime-imported model. When a glTF model has one or more animations, Piglet will attach: an Animation component for playing the animation clips (B), and an AnimationList component for accessing the animation clips by their original index in the glTF file (C). Attribution: These screenshots depict the “Cartoon Hartman” model by Willy Decarpentrie, skudgee@sketchfab, CC Attribution License." /><figcaption aria-hidden="true">Figure 5: Animation-related components on the root <code>GameObject</code> (A) of a runtime-imported model. When a glTF model has one or more animations, Piglet will attach: an <code>Animation</code> component for playing the animation clips (B), and an <code>AnimationList</code> component for accessing the animation clips by their original index in the glTF file (C). <strong>Attribution</strong>: These screenshots depict the <a href="https://sketchfab.com/3d-models/morpher-animated-face-military-cartoon-hartman-538a674c39e24c15965231ab2bdb656a">“Cartoon Hartman”</a> model by Willy Decarpentrie, <a href="https://sketchfab.com/skudgee">skudgee@sketchfab</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC Attribution License</a>.</figcaption>
+</figure>
+<p>Listing 5 shows an example script that imports a glTF model with an animation at runtime, and then immediately plays the animation. The basic steps for importing an animated glTF model are the same as for static models: (1) create a <code>GltfImportTask</code> in the <code>Start</code> method, and (2) advance execution of the task by calling <code>GltfImportTask.MoveNext</code> in <code>Update</code>.</p>
+<p>To play the animation after the model has finished loading, we assign the <code>OnComplete</code> method to <code>_task.OnCompleted</code> in <code>Start</code>. Piglet passes the root <code>GameObject</code> of the imported model as an argument to <code>OnComplete</code>, which we then use to obtain a reference to the <code>Animation</code> component for playing the animation. Since an <code>Animation</code> component can hold any number of animation clips, we need to provide a string-based key to <code>Animation.Play</code> that identifies the clip to play. By convention, Piglet uses the <code>.name</code> field of each animation clip as its key, and so we can obtain the desired key by accessing the animation clip (by index) from the <code>AnimationList</code> component. Note that the animation clips imported from glTF file always begin at index 1 of the <code>AnimationList</code>, because index 0 is reserved for the “Static Pose” clip.</p>
+<div id="lst:runtime-animation" class="listing cs">
+<div class="sourceCode" id="cb5"><pre class="sourceCode cs"><code class="sourceCode cs"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Piglet;</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> UnityEngine;</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">/// This MonoBehaviour provides a minimal example for</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">/// importing and playing glTF animations at runtime.</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> RuntimeAnimationBehaviour : MonoBehaviour</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// The currently running glTF import task.</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> GltfImportTask _task;</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked before the first frame.</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Create the glTF import task and set up callback for</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// successful completion.</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Start</span>()</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Uniformly scale the model such that the longest</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// dimension of its world-space axis-aligned bounding</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// box becomes 4.0 units.</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> importOptions = <span class="kw">new</span> <span class="fu">GltfImportOptions</span>();</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        importOptions.<span class="fu">AutoScale</span> = <span class="kw">true</span>;</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        importOptions.<span class="fu">AutoScaleSize</span> = <span class="fl">4.0f</span>;</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: To import a local .gltf/.glb/.zip file, you may</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// instead pass an absolute file path to GetImportTask</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (e.g. &quot;C:/Users/Joe/Desktop/piggleston.glb&quot;), or a byte[]</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// array containing the raw byte content of the file.</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        _task = RuntimeGltfImporter.<span class="fu">GetImportTask</span>(</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;https://awesomesaucelabs.github.io/piglet-webgl-demo/StreamingAssets/cartoon_hartman.zip&quot;</span>,</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>            importOptions);</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">OnCompleted</span> = OnComplete;</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Callback that is invoked by the glTF import task</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// after it has successfully completed.</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;param</span><span class="ot"> name=</span><span class="dt">&quot;importedModel&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// the root GameObject of the imported glTF model</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/param&gt;</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">void</span> <span class="fu">OnComplete</span>(GameObject importedModel)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> anim = importedModel.<span class="fu">GetComponent</span>&lt;Animation&gt;();</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> animList = importedModel.<span class="fu">GetComponent</span>&lt;AnimationList&gt;();</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Note: Imported animation clips always start</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>        <span class="co">// at index 1, because index &quot;0&quot; is reserved for</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the &quot;Static Pose&quot; clip.</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> clipKey = animList.<span class="fu">Clips</span>[<span class="dv">1</span>].<span class="fu">name</span>;</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>        anim.<span class="fu">Play</span>(clipKey);</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        Debug.<span class="fu">Log</span>(<span class="st">&quot;Success!&quot;</span>);</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Unity callback that is invoked after every frame.</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Here we call MoveNext() to advance execution</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// of the glTF import task.</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// </span><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="fu">Update</span>()</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        <span class="co">// advance execution of glTF import task</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>        _task.<span class="fu">MoveNext</span>();</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Listing 5: An example script that performs runtime import of a glTF model with an animation, then immediately plays that animation. <strong>Attribution</strong>: This script uses the <a href="https://sketchfab.com/3d-models/morpher-animated-face-military-cartoon-hartman-538a674c39e24c15965231ab2bdb656a">“Cartoon Hartman”</a> model by Willy Decarpentrie, <a href="https://sketchfab.com/skudgee">skudgee@sketchfab</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC Attribution License</a>.</p>
+</div>
+<h2 id="runtime-import-api">Runtime Import API</h2>
+<h3 id="runtime-import-api-overview">Overview</h3>
+<p>In Piglet, a runtime glTF import is accomplished by the following steps:</p>
+<ol type="1">
+<li>Create a <code>GltfImportTask</code> by calling <code>RuntimeGltfImporter.GetImportTask</code>, passing in the file path, URL, or raw byte content of the input <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file as a parameter. See <a href="#creating-a-gltfimporttask">Creating a GltfImportTask</a> for details.</li>
+<li>Configure callbacks on the <code>GltfImportTask</code> to execute custom code for success/failure/progress events (optional). See <a href="#configuring-callbacks-on-a-gltfimporttask">Configuring Callbacks on a GltfImportTask</a> for details.</li>
+<li>Execute the <code>GltfImportTask</code> by calling <code>MoveNext()</code> until the import has completed. See <a href="#executing-a-gltfimporttask">Executing a GltfImportTask</a> for details.</li>
+</ol>
+<p>For concrete code examples demonstrating the above steps, see the <a href="#runtime-import-tutorial">Runtime Import Tutorial</a>.</p>
+<h3 id="creating-a-gltfimporttask">Creating a GltfImportTask</h3>
+<p><code>RuntimeGltfImporter</code> provides the following static methods for creating a <code>GltfImportTask</code>:</p>
+<table style="width:98%;">
+<caption>RuntimeGltfImporter Methods</caption>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 17%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: left;">Return Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>GetImportTask(string uri,</code> <code>GltfImportOptions options=null)</code></td>
+<td style="text-align: left;"><code>GltfImportTask</code></td>
+<td style="text-align: left;">Create an import task that imports the glTF model from <code>uri</code>, where <code>uri</code> is an absolute file path, HTTP(S) URL, or Android content URI that points to a <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>GetImportTask(Uri uri,</code> <code>GltfImportOptions options=null)</code></td>
+<td style="text-align: left;"><code>GltfImportTask</code></td>
+<td style="text-align: left;">Create an import task that imports the glTF model from <code>uri</code>, where <code>uri</code> is an absolute file path, HTTP(S) URL, or Android content URI that points to a <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>GetImportTask(byte[] data,</code> <code>GltfImportOptions options=null)</code></td>
+<td style="text-align: left;"><code>GltfImportTask</code></td>
+<td style="text-align: left;">Create an import task that imports from the raw byte content of a <code>.gltf</code>/<code>.glb</code>/<code>.zip</code> file.</td>
+</tr>
+</tbody>
+</table>
+<p>All versions of <code>GetImportTask</code> accept an instance of <code>GltfImportOptions</code> as an optional second argument. <code>GltfImportOptions</code> currently provides the following options:</p>
+<table>
+<caption>GltfImportOptions Members</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Option</th>
+<th>Default</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>ShowModelAfterImport</code></td>
+<td><code>true</code></td>
+<td style="text-align: left;">Automatically unhide the model after a successful glTF import, by calling <code>SetActive(true)</code> on the root GameObject. Users might want to keep the model hidden until they have completed their own post-processing on the model (e.g. adding colliders).</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>AutoScale</code></td>
+<td><code>false</code></td>
+<td style="text-align: left;">Automatically resize the model after a successful glTF import</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>AutoScaleSize</code></td>
+<td><code>1.0</code></td>
+<td style="text-align: left;">Target size of model along its longest dimension</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>ImportAnimations</code></td>
+<td><code>true</code></td>
+<td style="text-align: left;">Import glTF animations as Legacy animation clips</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configuring-callbacks-on-a-gltfimporttask">Configuring Callbacks on a GltfImportTask</h3>
+<p>You can assign callback methods to delegate members of a <code>GltfImportTask</code>, in order to run custom code for success/failure/progress events. For example, callbacks can be used to position a successfully imported model within a scene or to attach a custom <code>MonoBehaviour</code>.</p>
+<table>
+<caption>GltfImportTask Delegate Members</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Callback</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>OnProgress</code></td>
+<td style="text-align: left;">Invoked at regular intervals to report progress of <code>GltfImportTask</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>OnAborted</code></td>
+<td style="text-align: left;">Invoked when <code>Abort()</code> is called on <code>GltfImportTask</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>OnException</code></td>
+<td style="text-align: left;">Invoked when <code>GltfImportTask</code> throws an exception (e.g. file not found)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>OnCompleted</code></td>
+<td style="text-align: left;">Invoked when <code>GltfImportTask</code> completes successfully</td>
+</tr>
+</tbody>
+</table>
+<h3 id="executing-a-gltfimporttask">Executing a GltfImportTask</h3>
+<p><code>GltfImportTask</code> provides the following methods for controlling its own execution:</p>
+<table>
+<caption>GltfImportTask Methods</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>MoveNext()</code></td>
+<td style="text-align: left;">Advance execution of the import task by a small increment. This method should be called repeatedly until the import task has completed.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Abort()</code></td>
+<td style="text-align: left;">Abort the import task. This method should typically be called in response to a user action, such as pressing a “Cancel” button.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="optimizing-gltf-files">Optimizing glTF Files</h1>
+<h2 id="using-supercompressed-textures">Using Supercompressed Textures (Unity 2019.3+)</h2>
+<h3 id="supercompressed-textures-overview">Overview</h3>
+<p>Piglet can load glTF files that contain <em>supercompressed textures</em><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a> in KTX2/ETC1S or KTX2/UASTC format<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a> (i.e. <a href="https://github.com/BinomialLLC/basis_universal">Basis Universal texture formats</a> in a <a href="http://github.khronos.org/KTX-Specification/">KTX 2.0 container</a>). The main advantages of supercompressed textures are that: (1) textures load faster, and (2) glTF files are smaller. The main disadvantage is loss of image quality, which can give textures a “blocky” appearance. Depending on your application, the loss of image quality may not be noticeable, whereas the performance benefits are usually significant.</p>
+<p>For a practical demonstration of the trade-offs, compare the ordinary and KTX2/ETC1S versions of the sample models at the <a href="https://awesomesaucelabs.github.io/piglet-webgl-demo/">Piglet Web Demo</a>. Note the differences in appearance, loading times, and file sizes.</p>
+<p>Before Piglet can load glTF files with supercompressed textures, you will need to install a third-party package called <a href="https://github.com/atteneder/KtxUnity">KtxUnity</a> into your Unity project (see <a href="#installing-ktxunity">Installing KtxUnity</a>). If you attempt to load a glTF file that contains supercompressed textures without installing KtxUnity, the textures will simply load as solid white, and Piglet will issue warnings on the Unity Console about failing to load the textures.</p>
+<p>Finally, if you plan to use supercompressed textures, you will probably need to preprocess the glTF files yourself. At the time of writing (Feb 2021), most glTF files on the web use PNG or JPEG textures, including the glTF files downloaded from <a href="https://sketchfab.com">Sketchfab</a>. For converting glTF files, I recommend using the <code>gltf-transform</code> command line tool, as described in <a href="#preprocessing-gltf-files">Preprocessing glTF Files</a>.</p>
+<h3 id="installing-ktxunity">Installing KtxUnity</h3>
+<p>To load glTF files with supercompressed textures, Piglet requires KtxUnity 0.9.1 or newer. To install KtxUnity, follow the instructions on the <a href="https://github.com/atteneder/KtxUnity">KtxUnity GitHub page</a>.</p>
+<p>In addition, please note the following “gotchas”:</p>
+<ul>
+<li>KtxUnity requires Unity 2019.3+. The provided installer link does not enforce this, but if you attempt to use a Unity version older than 2019.3, you will get errors about invalid <code>.meta</code> file format.</li>
+<li>When building for the PC/Standalone platform, remember to change <code>Architecture</code> from <code>x86</code> to <code>x86_64</code>. Otherwise, the native DLL for KtxUnity (<code>ktx_unity.dll</code>) will not be included in the build, and you may get a <code>DllNotFoundException</code> when you run your application.</li>
+<li>Starting in Unity 2020.1, dialogs will pop up after installing KtxUnity, informing you that a new “Scoped Registry” has been added to the Package Manager. This is normal and you should just close the dialog(s) without changing any settings.</li>
+<li>KtxUnity may not appear in the list of installed/available packages until you refresh the Unity Package Manager window, by clicking the circular arrow icon in the bottom left corner. (I’ve noticed this issue in Unity 2020.2.1f1.)</li>
+</ul>
+<h3 id="preprocessing-gltf-files">Preprocessing glTF Files</h3>
+<p>Most glTF files store their textures in PNG or JPEG format. To convert the textures in your glTF files to KTX2/ETC1S or KTX2/UASTC, I recommend using <a href="https://gltf-transform.donmccurdy.com/cli.html">gltf-transform</a>.</p>
+<p>In order to install <code>gltf-transform</code>, you will first need to install:</p>
+<ul>
+<li><a href="https://www.npmjs.com/get-npm">NodeJS and NPM</a></li>
+<li><a href="https://github.com/KhronosGroup/KTX-Software">KTX-Software</a>. This project provides the <code>toktx</code> program that is invoked by <code>gltf-transform</code>. To install the software, go to the <a href="https://github.com/KhronosGroup/KTX-Software/releases">GitHub releases page</a>, click/expand “Assets” at the bottom of the release notes, and choose the appropriate package/installer for your O/S. Note that if you are using Windows, you will also need to add <code>C:\Program Files\KTX-Software\bin</code> to your <code>Path</code>, so that <code>gltf-transform</code> can find the <code>toktx</code> binary.</li>
+</ul>
+<p>Once you have installed the above prerequisites, you will be able to install <code>gltf-transform</code> by running:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install --global @gltf-transform/cli</span></code></pre></div>
+<p>Once <code>gltf-transform</code> is installed, you will be able to convert the textures in a glTF file to KTX2/ETC1S by running:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gltf-transform</span> etc1s input.glb output.glb</span></code></pre></div>
+<p>or to KTX2/UASTC by running:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gltf-transform</span> uastc input.glb output.glb</span></code></pre></div>
+<p>The <code>gltf-transform</code> program provides options for restricting the conversion to specific textures (“slots”), adjusting quality settings, and more. See <code>gltf-transform etc1s --help</code> or <code>gltf-transform uastc --help</code> for further details.</p>
+<h1 id="urp-support">URP Support (Unity 2019.3+)</h1>
+<p>Piglet supports the Universal Render Pipeline (URP) in Unity 2019.3 or newer. To use Piglet with a URP-based project, unpack the shaders from the appropriate <code>.unitypackage</code> file in <code>Assets/Piglet/Extras</code>. For Unity versions 2019.3.0f6 through 2020.1.x, use <code>URP-Shaders-2019.3.unitypackage</code>. For Unity 2020.2.0b14 or newer, use <code>URP-Shaders-2020.2.unitypackage</code>.</p>
+<p>The shader files will be unpacked into <code>Assets/Piglet/Resources/Shaders/URP</code>. If you to forget unpack the shaders before performing an Editor or runtime glTF import, Piglet will fail with an error reminding you to install the shaders.</p>
+<h1 id="piglet-viewer">Sample Application: PigletViewer</h1>
+<figure>
+<img src="images/piglet-webgl-demo.png" id="fig:webgl-demo" width="800" alt="Figure 6: A screenshot of PigletViewer, a sample application which uses Piglet to view 3D models from glTF files." /><figcaption aria-hidden="true">Figure 6: A screenshot of PigletViewer, a sample application which uses Piglet to view 3D models from glTF files.</figcaption>
+</figure>
+<p>PigletViewer is a sample application which uses Piglet to view 3D models from glTF files (`.gltf`, `.glb`, or `.zip`), and which is used for the <a href="https://awesomesaucelabs.github.io/piglet-webgl-demo/">Piglet Web Demo</a>. For the benefit of Piglet customers, I have published the source code and documentation for PigletViewer online at <a href="https://github.com/AwesomesauceLabs/piglet-viewer" class="uri">https://github.com/AwesomesauceLabs/piglet-viewer</a>, under an MIT license. PigletViewer currently supports builds for Android, WebGL, and Windows, and thus it may be a useful reference for Piglet users developing for those platforms. In general, I recommend looking at the <a href="#runtime-import-tutorial">Runtime Import Tutorial</a> before exploring the PigletViewer code, as the tutorial provides a much more succinct introduction to the Piglet API.</p>
+<h1 id="changelog">Changelog</h1>
+<h2 id="release-1.2.1-2021-04-08">Release 1.2.1 (2021-04-08)</h2>
+<p>Compatibility fix for Unity 2021.1.1f1:</p>
+<ul>
+<li>Fix NullReferenceException during texture loading, due to change in behaviour of UnityWebRequestTexture.</li>
+</ul>
+<h2 id="release-1.2.0-2021-02-09">Release 1.2.0 (2021-02-09)</h2>
+<p>This release adds support for “supercompressed” textures in KTX2/ETC1S and KTX2/UASTC formats:</p>
+<ul>
+<li>Speeds up texture loading and reduces glTF file sizes</li>
+<li>Requires Unity 2019.3+ and installation of <a href="https://github.com/atteneder/KtxUnity">KtxUnity</a> package</li>
+<li>Requires preprocessing your glTF files</li>
+<li>See <a href="#using-supercompressed-textures">Using Supercompressed Textures</a> in manual for details</li>
+</ul>
+<p>Bugfixes:</p>
+<ul>
+<li>Reduce memory usage during runtime glTF imports by marking textures as “non-readable”. (This was a silly mistake on my part.)</li>
+<li>When loading glTF files from HTTP URLs, proceed even if the initial HEAD request to determine file size fails. (Some cloud hosts don’t support HEAD requests.)</li>
+<li>Fix odd opaque appearance of models that are both transparent and metallic. (Change <code>alpha:auto</code> -&gt; <code>alpha:fade</code> in <code>MetallicRoughnessBlend</code> and <code>SpecularGlossinessBlend</code> shaders.)</li>
+<li>Fix warnings about <code>.meta</code> files for non-existing folders, whenever an Editor glTF import overwrites an existing folder.</li>
+</ul>
+<h2 id="release-1.1.1-2021-01-05">Release 1.1.1 (2021-01-05)</h2>
+<p>Bugfix release:</p>
+<ul>
+<li>Fix handling of duplicate names in glTF files (e.g. two meshes named “mesh”). Since Piglet 1.1.0, duplicate names would cause asset files to overwrite each other during Editor imports, resulting in missing model components (textures, materials, meshes, animations).</li>
+<li>Fix random number generation bug that was causing duplicate temp file names. This was causing runtime glTF import tasks to clobber each other’s temp files and/or generate Windows “sharing violation” errors, if the import tasks were run in parallel or in quick succession.</li>
+</ul>
+<h2 id="release-1.1.0-2020-12-11">Release 1.1.0 (2020-12-11)</h2>
+<p>Major release!</p>
+<p>This release adds animation support:</p>
+<ul>
+<li>Import and play glTF animations, in the Editor or at runtime</li>
+<li>Animation of skins and blendshapes is fully supported</li>
+<li>Editor imports create Mecanim (default) or Legacy clips, runtime imports create Legacy clips</li>
+<li>A “Static Pose” clip is automatically generated to reset the model to its default pose</li>
+<li>Full details provided in new manual sections and tutorial videos</li>
+</ul>
+<p>Minor features:</p>
+<ul>
+<li>Editor glTF imports now use asset filenames that correspond to the original names from the glTF file. For example, if the glTF file contains textures named “grass” and “wood”, the output texture files are now “grass.png” and “wood.png”, instead of “texture_0.png” and “texture_1.png”.</li>
+<li><code>RuntimeGltfImporter.GetGltfImportTask</code> methods now accepts an optional <code>GltfImportOptions</code> argument</li>
+<li>New option to automatically unhide model after import (enabled by default)</li>
+<li>New option to scale imported models to a standard size (disabled by default)</li>
+<li>New option to enable/disable import of animations (enabled by default)</li>
+<li>New options available in Piglet Options Window (see Window -&gt; Piglet Options in Unity Menu)</li>
+</ul>
+<p>Bugfixes:</p>
+<ul>
+<li>Fix URPZWrite shader compile error in Unity 2020.2.0b14+ (“invalid conditional expression”)</li>
+<li>URP projects now need to install either URP-Shaders-2019.3.unitypackage and URP-Shaders-2020.2.unitypackage, based on Unity version</li>
+</ul>
+<p>Documentation:</p>
+<ul>
+<li>New manual sections for animation</li>
+<li>Manual is now included with Piglet in HTML format, rather than PDF (automated HTML -&gt; PDF conversion was very error-prone)</li>
+<li>Moved Changelog into manual, so prospective Piglet customers can read it</li>
+<li>Nicer manual formatting with <code>pandoc</code> and <code>classless.css</code></li>
+</ul>
+<h2 id="release-1.0.4-2020-09-28">Release 1.0.4 (2020-09-28)</h2>
+<p>Added support for URP in Unity 2019.3+:</p>
+<ul>
+<li>If your project uses URP, just unpack Assets/Piglet/Extras/URPShaders.unitypackage and you are ready to go!</li>
+</ul>
+<p>Bugfixes:</p>
+<ul>
+<li>Fix import failures when file path contains spaces</li>
+<li>Fix _emissiveFactor in shaders for built-in render pipeline</li>
+<li>Fix warning: “Script ‘Animation’ has the same name as built-in Unity component.”</li>
+<li>Fix warnings about obsolete UnityWebRequest API in Unity 2020.2</li>
+</ul>
+<h2 id="release-1.0.3-2020-09-02">Release 1.0.3 (2020-09-02)</h2>
+<p>Bugfix release.</p>
+<p>GltfImporter:</p>
+<ul>
+<li>Support models with &gt; 64k vertices per mesh</li>
+<li>Minor code cleanup and refactoring (e.g. use more consistent method names, remove unused method parameters)</li>
+</ul>
+<h2 id="release-1.0.2-2020-08-10">Release 1.0.2 (2020-08-10)</h2>
+<p>Bugfix release.</p>
+<ul>
+<li>Add .asmdef files to Piglet tree, so that advanced users have better control over their build config</li>
+</ul>
+<p>ChangeLog.txt [new]:</p>
+<ul>
+<li>Move ChangeLog.txt to Assets/Piglet/Documentation, so that users can see it.</li>
+</ul>
+<p>GltfImporter:</p>
+<ul>
+<li>Throw Piglet.JsonParseException instead of Newtonsoft.Json.JsonParseException on glTF parsing errors. This decouples Piglet applications from Json.NET, so that Piglet has the option to use other JSON parsing libraries in the future.</li>
+</ul>
+<p>UnityGLTF:</p>
+<ul>
+<li>Replace GLTFSerialization.dll with C# source files, so that Piglet no longer depends on a specific version of Newtonsoft.Json.dll (10:0:0:0). This allows users to resolve the multiple-copies-of-Json.NET problem by deleting Piglet’s copy of Newtonsoft.Json.dll. It also gives users more convenient access to the glTF parsing code, for their own understanding/modification.</li>
+</ul>
+<h2 id="release-1.0.1-2020-07-20">Release 1.0.1 (2020-07-20)</h2>
+<p>Bugfixes:</p>
+<ul>
+<li>Fix hardcoded paths that would cause NullReferenceException after “Piglet” folder was moved/renamed</li>
+<li>Speed up reads from Android content URIs</li>
+</ul>
+<h2 id="release-1.0.0-2020-07-10">Release 1.0.0 (2020-07-10)</h2>
+<p>First release!</p>
+<h1 id="footnotes">Footnotes</h1>
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>As of June 2020, Google Poly only provides glTF download links for models made with <a href="https://arvr.google.com/blocks/">Google Blocks</a> (as opposed to <a href="https://www.tiltbrush.com/">Tilt Brush</a>). To see only Blocks-generated models on Google Poly, visit <a href="https://poly.google.com/blocks" class="uri">https://poly.google.com/blocks</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p>I have tested the <a href="https://awesomesaucelabs.github.io/piglet-webgl-demo/">Piglet Web Demo</a> with Firefox and Google Chrome on Windows 10 64-bit. If you are using Google Chrome, you can improve performance of the demo by <a href="https://www.lifewire.com/hardware-acceleration-in-chrome-4125122">turning on hardware acceleration</a> (i.e. GPU acceleration) in the browser settings. Currently this option is disabled in Chrome by default.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3" role="doc-endnote"><p>As of December 2020, Unity has two animation systems: Mecanim and Legacy. While Unity recommends that new projects use Mecanim, each system has its own advantages and drawbacks. Briefly, Mecanim is a newer system that has more features than Legacy (e.g. blending, retargeting), but has a steeper learning curve and does not (yet) provide an API for creating animations at runtime. On the other hand, the Legacy animation system is simpler, easier to learn, and supports creating animations at runtime. You should not let the name “Legacy” discourage you from using the Legacy animation system if it is a good fit for your project. Unity has continued to support and maintain the Legacy system since the introduction of Mecanim in Unity 4 (November 2012), and it is unlikely that the Legacy system will be removed until Mecanim supports runtime creation of animation clips.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4" role="doc-endnote"><p>If you are new to the Mecanim animation system, I highly recommend watching a series of videos called <a href="https://learn.unity.com/tutorial/controlling-animation">Controlling Animation</a> on Unity Learn. These videos provide a very concise introduction to the capabilities and use of Mecanim.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5" role="doc-endnote"><p>Runtime glTF imports use the Legacy animation system because Mecanim is not capable of creating animation clips at runtime.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6" role="doc-endnote"><p><code>AnimatorController</code> layers have not been mentioned up to this point, because the controllers generated by Piglet only use the default layer (i.e. layer 0, “Base Layer”). An <code>AnimatorController</code> can (optionally) be split into multiple layers, where each layer has its own state machine, for the purpose of blending multiple animations for the same mode (e.g. a running and shooting animation for a humanoid character). For further information, see the “Animator Controllers Layers” video from the <a href="https://learn.unity.com/tutorial/controlling-animation#5c7f8528edbc2a002053b4e2">Controlling Animation</a> video series on Unity Learn.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7" role="doc-endnote"><p>The “Static Pose” clip (a.k.a “Bind Pose” or “T-Pose”) is useful because playing an animation clip permanently changes the transforms (translation/rotation/scale) of the game objects in the model. Users can play the “Static Pose” clip to return the transforms to their original state.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8" role="doc-endnote"><p>The main limitation is that <a href="https://docs.unity3d.com/ScriptReference/AnimationClip.SetCurve.html">AnimationClip.SetCurve</a> only works at runtime for Legacy animation clips.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9" role="doc-endnote"><p>For the motivation behind supercompressed textures, see <a href="https://pixel.engineer/posts/basis-universal-texture-format-introduction/">Basis Universal texture format introduction</a> (Atteneder, 2019). For a more detailed technical explanation, see <a href="http://gamma.cs.unc.edu/GST/gst.pdf">GST: GPU-decodable Supercompressed Textures</a> (Krajcevski et al., 2016).<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10" role="doc-endnote"><p>KTX2/ETC1S is more commonly used than KTX2/UASTC because it provides a higher data compression rate (at the cost of image quality).<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

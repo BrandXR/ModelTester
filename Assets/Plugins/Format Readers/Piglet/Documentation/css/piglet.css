@@ -1,0 +1,10 @@
+/* remove vertical gaps in Table of Contents created by classless.css */
+
+ul > li > ul {
+    margin: 0.5rem 0rem -0.5rem;
+}
+
+div.listing > p {
+    text-align: center;
+    color: #888;
+}

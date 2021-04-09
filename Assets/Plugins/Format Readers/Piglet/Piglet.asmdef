@@ -1,0 +1,31 @@
+{
+    "name": "Piglet",
+    "references": [
+        "GUID:3d354272d3f2f4c3387dbccbaebd0f60"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.atteneder.ktx",
+            "expression": "0.0.0",
+            "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.atteneder.ktx",
+            "expression": "0.9.1",
+            "define": "KTX_UNITY_0_9_1_OR_NEWER"
+        },
+        {
+            "name": "com.atteneder.ktx",
+            "expression": "1.0.0-preview",
+            "define": "KTX_UNITY_1_0_0_OR_NEWER"
+        }
+    ],
+    "noEngineReferences": false
+}
