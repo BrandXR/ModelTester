@@ -272,10 +272,11 @@ namespace Piglet
 			// texture was successfully loaded as a PNG/JPG.
 
 			var data = request.downloadHandler.data;
-			if (data != null && IsKtx2Data(data))
+
+			if( data != null && IsKtx2Data( data ) )
 			{
 #if KTX_UNITY_0_9_1_OR_NEWER
-				foreach (var result in LoadKtx2Data(data))
+				foreach( var result in LoadKtx2Data( data ) )
 					yield return (result, false);
 #elif KTX_UNITY
 				Debug.LogWarning("Failed to load texture in KTX2 format, "+
@@ -290,7 +291,8 @@ namespace Piglet
 #endif
 				yield break;
 			}
-
+			else
+			{
 #if USE_MODIFIED_PIGLET
 				//Image is not a KTX2/Basis texture, load it as a .png/.jpg instead
                 request = UnityWebRequestTexture.GetTexture( uri, true );
@@ -304,10 +306,12 @@ namespace Piglet
                         "failed to load image URI {0}: {1}",
                         uri, request.error ) );
 #endif
+				Debug.Log( "TextureUtil.cs ReadTextureEnum()" );
+				Texture2D texture = DownloadHandlerTexture.GetContent( request );
 
-			Texture2D texture = DownloadHandlerTexture.GetContent(request);
+				yield return (texture, true);
+			}
 
-			yield return (texture, true);
 		}
 	}
 }
